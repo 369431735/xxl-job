@@ -37,7 +37,11 @@ public class AdminBizImpl implements AdminBiz {
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;
 
-
+    /***
+     * 执行器完成任务后 回调
+     * @param callbackParamList
+     * @return
+     */
     @Override
     public ReturnT<String> callback(List<HandleCallbackParam> callbackParamList) {
         for (HandleCallbackParam handleCallbackParam: callbackParamList) {

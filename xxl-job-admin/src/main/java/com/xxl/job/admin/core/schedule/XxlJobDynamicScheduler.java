@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ *  调度中心核心类
  * base quartz scheduler util
  * @author xuxueli 2015-12-19 16:13:53
  */
@@ -47,7 +48,7 @@ public final class XxlJobDynamicScheduler implements ApplicationContextAware {
 	// accessToken
     private static String accessToken;
     public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+        XxlJobDynamicScheduler.accessToken = accessToken;
     }
 
     // dao
@@ -69,13 +70,13 @@ public final class XxlJobDynamicScheduler implements ApplicationContextAware {
 
     // ---------------------- init + destroy ----------------------
     public void init() throws Exception {
-        // admin registry monitor run
+        // admin registry monitor run  执行器自动注册
         JobRegistryMonitorHelper.getInstance().start();
 
-        // admin monitor run
+        // admin monitor run  监控执行日志
         JobFailMonitorHelper.getInstance().start();
 
-        // admin-server(spring-mvc)
+        // admin-server(spring-mvc)  调度中心 与  处理地址
         NetComServerFactory.putService(AdminBiz.class, XxlJobDynamicScheduler.adminBiz);
         NetComServerFactory.setAccessToken(accessToken);
 
@@ -178,7 +179,7 @@ public final class XxlJobDynamicScheduler implements ApplicationContextAware {
 
     /**
      * addJob
-     *
+     *  将任务添加到scheduler器中
      * @param jobName
      * @param jobGroup
      * @param cronExpression
@@ -276,7 +277,7 @@ public final class XxlJobDynamicScheduler implements ApplicationContextAware {
     
     /**
      * unscheduleJob
-     *
+     * 移除任务
      * @param jobName
      * @param jobGroup
      * @return
@@ -295,7 +296,7 @@ public final class XxlJobDynamicScheduler implements ApplicationContextAware {
 
     /**
      * pause
-     *
+     * 暂停任务
      * @param jobName
      * @param jobGroup
      * @return
@@ -318,7 +319,7 @@ public final class XxlJobDynamicScheduler implements ApplicationContextAware {
     
     /**
      * resume
-     *
+     * 继续任务
      * @param jobName
      * @param jobGroup
      * @return
@@ -341,7 +342,7 @@ public final class XxlJobDynamicScheduler implements ApplicationContextAware {
     
     /**
      * run
-     *
+     * 调用任务
      * @param jobName
      * @param jobGroup
      * @return

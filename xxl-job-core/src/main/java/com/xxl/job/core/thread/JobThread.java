@@ -103,12 +103,13 @@ public class JobThread extends Thread{
 		// execute
 		while(!toStop){
 			running = false;
+			//空闲次数（超过30次就中断线程）
 			idleTimes++;
-
+            //执行参数
             TriggerParam triggerParam = null;
             ReturnT<String> executeResult = null;
             try {
-				// to check toStop signal, we need cycle, so wo cannot use queue.take(), instand of poll(timeout)
+				// poll 非阻塞    take 阻塞
 				triggerParam = triggerQueue.poll(3L, TimeUnit.SECONDS);
 				if (triggerParam!=null) {
 					running = true;
@@ -136,7 +137,7 @@ public class JobThread extends Thread{
 							});
 							futureThread = new Thread(futureTask);
 							futureThread.start();
-
+                            //超时
 							executeResult = futureTask.get(triggerParam.getExecutorTimeout(), TimeUnit.SECONDS);
 						} catch (TimeoutException e) {
 
@@ -158,6 +159,7 @@ public class JobThread extends Thread{
 					XxlJobLogger.log("<br>----------- xxl-job job execute end(finish) -----------<br>----------- ReturnT:" + executeResult);
 
 				} else {
+					  //超过30次没有获取到执行参数 就中断线程
 					if (idleTimes > 30) {
 						XxlJobExecutor.removeJobThread(jobId, "excutor idel times over limit.");
 					}
@@ -174,10 +176,11 @@ public class JobThread extends Thread{
 
 				XxlJobLogger.log("<br>----------- JobThread Exception:" + errorMsg + "<br>----------- xxl-job job execute end(error) -----------");
 			} finally {
+            	// 回调（记录日志等操作）
                 if(triggerParam != null) {
                     // callback handler info
                     if (!toStop) {
-                        // commonm
+                        // commonm 正常执行完定时任务
                         TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTim(), executeResult));
                     } else {
                         // is killed
@@ -189,6 +192,7 @@ public class JobThread extends Thread{
         }
 
 		// callback trigger request in queue
+		//回调 因线程结束未被执行的日志
 		while(triggerQueue !=null && triggerQueue.size()>0){
 			TriggerParam triggerParam = triggerQueue.poll();
 			if (triggerParam!=null) {

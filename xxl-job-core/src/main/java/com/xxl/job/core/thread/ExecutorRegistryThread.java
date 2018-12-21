@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 确实有必要通过每30秒注册一次，这样能确定双方都存活
  * Created by xuxueli on 17/3/2.
  */
 public class ExecutorRegistryThread extends Thread {
@@ -52,6 +53,7 @@ public class ExecutorRegistryThread extends Thread {
                 while (!toStop) {
                     try {
                         RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appName, executorAddress);
+                          //之前已经获取了所有调度中心的本地代理
                         for (AdminBiz adminBiz: XxlJobExecutor.getAdminBizList()) {
                             try {
                                 ReturnT<String> registryResult = adminBiz.registry(registryParam);

@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Created by xuxueli on 17/3/10.
+ * 故障转移
  */
 public class ExecutorRouteFailover extends ExecutorRouter {
 
