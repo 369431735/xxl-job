@@ -6,6 +6,7 @@ import com.xxl.job.core.biz.model.TriggerParam;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 以一天为频率计算期限
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExecutorRouteLFU extends ExecutorRouter {
 
-    private static ConcurrentHashMap<Integer, HashMap<String, Integer>> jobLfuMap = new ConcurrentHashMap<Integer, HashMap<String, Integer>>();
+    private static ConcurrentMap<Integer, HashMap<String, Integer>> jobLfuMap = new ConcurrentHashMap<Integer, HashMap<String, Integer>>();
     private static long CACHE_VALID_TIME = 0;
 
     public String route(int jobId, List<String> addressList) {
@@ -34,9 +35,23 @@ public class ExecutorRouteLFU extends ExecutorRouter {
             lfuItemMap = new HashMap<String, Integer>();
             jobLfuMap.putIfAbsent(jobId, lfuItemMap);   // 避免重复覆盖
         }
+
+        // put new
         for (String address: addressList) {
             if (!lfuItemMap.containsKey(address) || lfuItemMap.get(address) >1000000 ) {
                 lfuItemMap.put(address, new Random().nextInt(addressList.size()));  // 初始化时主动Random一次，缓解首次压力
+            }
+        }
+        // remove old
+        List<String> delKeys = new ArrayList<>();
+        for (String existKey: lfuItemMap.keySet()) {
+            if (!addressList.contains(existKey)) {
+                delKeys.add(existKey);
+            }
+        }
+        if (delKeys.size() > 0) {
+            for (String delKey: delKeys) {
+                lfuItemMap.remove(delKey);
             }
         }
 
